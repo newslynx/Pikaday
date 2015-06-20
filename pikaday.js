@@ -2,6 +2,7 @@
  * Pikaday
  *
  * Copyright © 2014 David Bushell | BSD & MIT license | https://github.com/dbushell/Pikaday
+ * A fork with time support from https://github.com/owenmead/Pikaday
  */
 
 (function (root, factory)
@@ -744,7 +745,7 @@
          */
         getMoment: function()
         {
-            return hasMoment ? moment(this._d) : null;
+            return hasMoment ? moment(this._d).tz(this._o.timezone) : null;
         },
 
         /**
@@ -978,8 +979,8 @@
             if (opts.showTime) {
                 html += '<div class="pika-time-container">' +
                         renderTime(
-                            this._d ? this._d.getHours() : 0,
-                            this._d ? this._d.getMinutes() : 0,
+                            this._d ? moment(this._d).tz(this._o.timezone).format('HH') : 0,
+                            this._d ? moment(this._d).tz(this._o.timezone).format('mm') : 0,
                             this._d ? this._d.getSeconds() : 0,
                             opts)
                     + '</div>';
@@ -1003,15 +1004,23 @@
             }
         },
 
+        // NewsLynx this function below is modified per
+        // https://github.com/dbushell/Pikaday/pull/298/commits
         adjustPosition: function()
         {
+          var field, pEl, width, height, viewportWidth, viewportHeight, scrollTop, left, top, clientRect;
+            
             if (this._o.container) return;
-            var field = this._o.trigger, pEl = field,
-            width = this.el.offsetWidth, height = this.el.offsetHeight,
-            viewportWidth = window.innerWidth || document.documentElement.clientWidth,
-            viewportHeight = window.innerHeight || document.documentElement.clientHeight,
-            scrollTop = window.pageYOffset || document.body.scrollTop || document.documentElement.scrollTop,
-            left, top, clientRect;
+            
+            this.el.style.position = 'absolute';
+            
+            field = this._o.trigger;
+            pEl = field;
+            width = this.el.offsetWidth;
+            height = this.el.offsetHeight;
+            viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+            viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            scrollTop = window.pageYOffset || document.body.scrollTop || document.documentElement.scrollTop;
 
             if (typeof field.getBoundingClientRect === 'function') {
                 clientRect = field.getBoundingClientRect();
@@ -1044,7 +1053,7 @@
                 top = top - height - field.offsetHeight;
             }
 
-            this.el.style.position = 'absolute';
+            // this.el.style.position = 'absolute';
             this.el.style.left = left + 'px';
             this.el.style.top = top + 'px';
         },
